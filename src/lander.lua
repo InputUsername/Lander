@@ -95,6 +95,10 @@ elseif action == "make" then
 
 	print("Loaded site config")
 
-	--TODO: things
+	local markdown = require("markdown")
+
+	if markdown then
+		print("Loaded Markdown renderer")
+	end
 
 end
