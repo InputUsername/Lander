@@ -20,6 +20,19 @@ local INDEX_DEFAULT_CONTENT = [[<!DOCTYPE html>
 </body>
 </html>]]
 
+local POST_FILE = "_pages/post.html"
+local POST_DEFAULT_CONTENT = [[<!DOCTYPE html>
+<html>
+<head>
+	<title>{% get( post.title ) %}
+</head>
+<body>
+	<h1>{% get( post.title ) %}</h1>
+	<p>Posted on {% get( post.date ) %} by {% get( post.author ) %}</p>
+	<p>{% get( post.content ) %}
+</body>
+</html>]]
+
 local CONFIG_FILE = "_config.lua"
 local CONFIG_DEFAULT_CONTENT = [[return {
 	name = "A website",
