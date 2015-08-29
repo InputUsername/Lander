@@ -1,0 +1,4 @@
+NOTE TO SELF:
+
+_NEVER_ CREATE A RECURSIVE FILE DELETE FUNCTION AGAIN
+(if you don't want to lose four hours of work, that is)
