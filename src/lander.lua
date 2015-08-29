@@ -13,7 +13,7 @@ local INDEX_FILE = "_pages/index.html"
 local INDEX_DEFAULT_CONTENT = [[<!DOCTYPE html>
 <html>
 <head>
-	<title>{% config.name %}</title>
+	<title><% echo( config.site.name ) %></title>
 </head>
 <body>
 	<h1>Hello world!</h1>
@@ -24,18 +24,21 @@ local POST_FILE = "_pages/post.html"
 local POST_DEFAULT_CONTENT = [[<!DOCTYPE html>
 <html>
 <head>
-	<title>{% get( post.title ) %}
+	<title>{% echo( post.title ) %}
 </head>
 <body>
-	<h1>{% get( post.title ) %}</h1>
-	<p>Posted on {% get( post.date ) %} by {% get( post.author ) %}</p>
-	<p>{% get( post.content ) %}
+	<h1><% echo( post.title ) %></h1>
+	<p>Posted on <% echo( post.date ) %> by <% echo( post.author ) %></p>
+	<p><% echo( post.content ) %>
 </body>
 </html>]]
 
 local CONFIG_FILE = "_config.lua"
 local CONFIG_DEFAULT_CONTENT = [[return {
-	name = "A website",
+	site = {
+		name = "A website",
+	},
+	pagesAsDirectories = false,
 }]]
 
 ---- Required files and directories ----
