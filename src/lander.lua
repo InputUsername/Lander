@@ -1,6 +1,8 @@
 -- Lander
 -- (c) 2015 Koen Bolhuis
 
+require("lfs")
+
 local action = arg[1]
 local arguments = {}
 
@@ -46,26 +48,34 @@ local DIRECTORIES = {"_posts", "_pages", "_output"}
 
 local FILES = {
 	[INDEX_FILE] = INDEX_DEFAULT_CONTENT,
+	[POST_FILE] = POST_DEFAULT_CONTENT,
 	[CONFIG_FILE] = CONFIG_DEFAULT_CONTENT,
 }
 
 ---- Actions ----
 if action == "setup" then
 
-	print("Setting up site")
-
-	for _, dir in ipairs(DIRECTORIES) do
-		print("Making " .. dir)
-		os.execute("mkdir " .. dir)
+	local output = ""
+	if arguments[1] then
+		output = arguments[1] .. "/"
 	end
 
-	for file, content in pairs(FILES) do
-		print("Making " .. file)
+	print("Setting up site")
 
-		local handle = io.open(file, "w")
+	print("* Making directories")
+	for _, dir in ipairs(DIRECTORIES) do
+		print(" * " .. output .. dir)
+		lfs.makedir(output .. dir)
+	end
+
+	print("* Making files")
+	for file, content in pairs(FILES) do
+		print(" * " .. output .. file)
+
+		local handle = io.open(output .. file, "w")
 
 		if not handle then
-			print("Error: cannot create '" .. file .. "'")
+			print("Error: cannot create '" .. output .. file .. "'")
 			os.exit(1)
 		end
 
@@ -80,12 +90,17 @@ if action == "setup" then
 
 elseif action == "make" then
 
+	local target = ""
+	if arguments[1] then
+		target = arguments[1] .. "/"
+	end
+
 	print("Generating site")
 
-	local result, siteConfigFunc = pcall(loadfile, CONFIG_FILE)
+	local result, siteConfigFunc = pcall(loadfile, target .. CONFIG_FILE)
 
 	if not result then
-		print("Error: cannot open the site config file (" .. CONFIG_FILE .. ")")
+		print("Error: cannot open the site config file (" .. target .. CONFIG_FILE .. ")")
 		os.exit(1)
 	end
 
@@ -96,12 +111,17 @@ elseif action == "make" then
 		os.exit(1)
 	end
 
-	print("Loaded site config")
+	print("* Loaded site config")
 
 	local markdown = require("markdown")
 
-	if markdown then
-		print("Loaded Markdown renderer")
+	if not markdown then
+		print("Error: something went wrong while loading the Markdown renderer")
+		os.exit(1)
 	end
+
+	print("* Loaded Markdown renderer")
+
+	
 
 end
