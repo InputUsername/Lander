@@ -26,12 +26,12 @@ local POST_FILE = "_pages/post.html"
 local POST_DEFAULT_CONTENT = [[<!DOCTYPE html>
 <html>
 <head>
-	<title>{% echo( post.title ) %}
+	<title><% echo( post.title ) %></title>
 </head>
 <body>
 	<h1><% echo( post.title ) %></h1>
 	<p>Posted on <% echo( post.date ) %> by <% echo( post.author ) %></p>
-	<p><% echo( post.content ) %>
+	<p><% echo( post.content ) %></p>
 </body>
 </html>]]
 
