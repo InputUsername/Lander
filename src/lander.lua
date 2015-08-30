@@ -11,6 +11,10 @@ for i = 2, #arg do
 end
 
 ---- Constants ----
+local POSTS_DIR = "_posts"
+local PAGES_DIR = "_pages"
+local OUTPUT_DIR = "_output"
+
 local INDEX_FILE = "_pages/index.html"
 local INDEX_DEFAULT_CONTENT = [[<!DOCTYPE html>
 <html>
@@ -45,6 +49,7 @@ local CONFIG_DEFAULT_CONTENT = [[return {
 
 ---- Required files and directories ----
 local DIRECTORIES = {"_posts", "_pages", "_output"}
+local DIRECTORIES = {POSTS_DIR, PAGES_DIR, OUTPUT_DIR}
 
 local FILES = {
 	[INDEX_FILE] = INDEX_DEFAULT_CONTENT,
