@@ -159,6 +159,54 @@ elseif action == "make" then
 
 	print("* Loaded Markdown renderer")
 
-	-- Handle
+	print("* Converting pages")
+
+	-- Handle pages
+	for file in lfs.dir(target .. PAGES_DIR) do
+		local filePath = target .. PAGES_DIR .. "/" .. file
+
+		if isHtmlFile(filePath) and not string.ends(filePath, POST_FILE) then
+			local outputPath = target .. OUTPUT_DIR .. "/" .. file
+
+			print(" * " .. filePath .. " -> " .. outputPath)
+
+			local fileContent = readFile(filePath)
+
+			fileContent = string.gsub(fileContent, "%<%%(.-)%%%>", function(code)
+				local output = ""
+
+				local env = {
+					["echo"] = function(...)
+						local out = table.concat({...}, "\n")
+						if type(out) == "string" then
+							output = output .. out
+						end
+					end,
+					["config"] = config,
+				}
+
+				local codeFunc, err = loadstring(code)
+				if not codeFunc then
+					print("Error: something went wrong while loading template code")
+					print(err)
+					env.echo(err .. "\n")
+				else
+					setfenv(codeFunc, env)
+					local result, err = pcall(codeFunc)
+					if not result then
+						print("Error: something went wrong while running template code")
+						print(err)
+						env.echo(err .. "\n")
+					end
+				end
+
+				return output
+			end)
+
+			writeFile(outputPath, fileContent)
+		end
+	end
+
+	print("Done")
 
 end
