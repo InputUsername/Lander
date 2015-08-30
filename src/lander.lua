@@ -168,6 +168,13 @@ elseif action == "make" then
 		if isHtmlFile(filePath) and not string.ends(filePath, POST_FILE) then
 			local outputPath = target .. OUTPUT_DIR .. "/" .. file
 
+			if config.pagesAsDirectories and not string.ends(filePath, INDEX_FILE) then
+				local fileName = pathInfo(file)[3]
+				outputPath = target .. OUTPUT_DIR .. "/" .. fileName
+				lfs.mkdir(outputPath)
+				outputPath = outputPath .. "/index.html"
+			end
+
 			print(" * " .. filePath .. " -> " .. outputPath)
 
 			local fileContent = readFile(filePath)
