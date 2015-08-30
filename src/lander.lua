@@ -10,6 +10,37 @@ for i = 2, #arg do
 	table.insert(arguments, arg[i])
 end
 
+---- Utility functions ----
+local function pathInfo(path)
+	-- Returns {location, name + extension, name, extension}
+	return {string.match(path, "(.-)(([^/]-)([^%.]+))$")}
+end
+
+local function isHtmlFile(path)
+	local ext = pathInfo(path)[4]
+	return (ext == "html" and lfs.attributes(path, "mode") == "file")
+end
+
+function string.ends(str, trailing)
+	return (trailing == "" or string.sub(str, -string.len(trailing)) == trailing)
+end
+
+local function readFile(path)
+	local handle = io.open(path)
+	if not handle then return end
+	local content = handle:read("*a")
+	handle:close()
+	return content
+end
+
+local function writeFile(path, text)
+	local handle = io.open(path, "w")
+	if not handle then return false end
+	handle:write(text)
+	handle:close()
+	return true
+end
+
 ---- Constants ----
 local POSTS_DIR = "_posts"
 local PAGES_DIR = "_pages"
