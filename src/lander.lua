@@ -99,8 +99,8 @@ if action == "setup" then
 
 	print("* Making directories")
 	for _, dir in ipairs(DIRECTORIES) do
-		print(" * " .. output .. dir)
-		lfs.makedir(output .. dir)
+		print(" * " .. output .. dir .. "/")
+		lfs.mkdir(output .. dir)
 	end
 
 	print("* Making files")
