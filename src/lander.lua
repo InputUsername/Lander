@@ -101,22 +101,24 @@ elseif action == "make" then
 
 	print("Generating site")
 
-	local result, siteConfigFunc = pcall(loadfile, target .. CONFIG_FILE)
+	-- Load configuration file
+	local result, configFunc = pcall(loadfile, target .. CONFIG_FILE)
 
 	if not result then
 		print("Error: cannot open the site config file (" .. target .. CONFIG_FILE .. ")")
 		os.exit(1)
 	end
 
-	local result, siteConfig = pcall(siteConfigFunc)
+	local result, config = pcall(configFunc)
 
-	if not result then
+	if not result or not config then
 		print("Error: something went wrong while loading the site config file")
 		os.exit(1)
 	end
 
 	print("* Loaded site config")
 
+	-- Load Markdown renderer
 	local markdown = require("markdown")
 
 	if not markdown then
@@ -126,6 +128,6 @@ elseif action == "make" then
 
 	print("* Loaded Markdown renderer")
 
-	
+	-- Handle
 
 end
