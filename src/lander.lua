@@ -13,7 +13,7 @@ end
 ---- Utility functions ----
 local function pathInfo(path)
 	-- Returns {location, name + extension, name, extension}
-	return {string.match(path, "(.-)(([^/]-)([^%.]+))$")}
+	return {string.match(path, "(.-)(([^/]-)%.([^%.]+))$")}
 end
 
 local function isHtmlFile(path)
