@@ -1,3 +1,2 @@
-src/_*
-src/markdown.lua
+test/*
 ok.bat
