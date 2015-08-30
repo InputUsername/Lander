@@ -44,6 +44,7 @@ end
 ---- Constants ----
 local POSTS_DIR = "_posts"
 local PAGES_DIR = "_pages"
+local INCLUDES_DIR = "_includes"
 local OUTPUT_DIR = "_output"
 
 local INDEX_FILE = "_pages/index.html"
@@ -79,7 +80,7 @@ local CONFIG_DEFAULT_CONTENT = [[return {
 }]]
 
 ---- Required files and directories ----
-local DIRECTORIES = {POSTS_DIR, PAGES_DIR, OUTPUT_DIR}
+local DIRECTORIES = {POSTS_DIR, PAGES_DIR, INCLUDES_DIR, OUTPUT_DIR}
 
 local FILES = {
 	[INDEX_FILE] = INDEX_DEFAULT_CONTENT,
@@ -187,6 +188,12 @@ elseif action == "make" then
 						local out = table.concat({...}, "\n")
 						if type(out) == "string" then
 							output = output .. out
+						end
+					end,
+					["include"] = function(file)
+						local content = readFile(target .. INCLUDES_DIR .. "/" .. file)
+						if content then
+							output = output .. content
 						end
 					end,
 					["config"] = config,
