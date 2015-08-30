@@ -48,7 +48,6 @@ local CONFIG_DEFAULT_CONTENT = [[return {
 }]]
 
 ---- Required files and directories ----
-local DIRECTORIES = {"_posts", "_pages", "_output"}
 local DIRECTORIES = {POSTS_DIR, PAGES_DIR, OUTPUT_DIR}
 
 local FILES = {
