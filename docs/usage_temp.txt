@@ -1,0 +1,15 @@
+Setting up a site:
+   lua lander.lua setup [directory]
+   
+   This will create all necessary subdirectories and files
+   for a new Lander site in [directory]. If no directory is
+   given, the working directory will be used.
+
+Generating a site:
+   lua lander.lua make [directory]
+   
+   This will use the subdirectories and files in [directory]
+   to generate a static site under [directory]/_output. If
+   no directory is given, the working directory will be used.
+   
+   Assumes every necessary file/directory is present.
