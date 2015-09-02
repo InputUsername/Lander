@@ -16,9 +16,9 @@ local function pathInfo(path)
 	return {string.match(path, "(.-)(([^/]-)%.([^%.]+))$")}
 end
 
-local function isHtmlFile(path)
-	local ext = pathInfo(path)[4]
-	return (ext == "html" and lfs.attributes(path, "mode") == "file")
+local function checkExtension(path, extension)
+	local pathExt = pathInfo(path)[4]
+	return (pathExt == extension and lfs.attributes(path, "mode") == "file")
 end
 
 function string.ends(str, trailing)
@@ -166,7 +166,7 @@ elseif action == "make" then
 	for file in lfs.dir(target .. PAGES_DIR) do
 		local filePath = target .. PAGES_DIR .. "/" .. file
 
-		if isHtmlFile(filePath) and not string.ends(filePath, POST_FILE) then
+		if checkExtension(filePath, "html") and not string.ends(filePath, POST_FILE) then
 			local outputPath = target .. OUTPUT_DIR .. "/" .. file
 
 			if config.pagesAsDirectories and not string.ends(filePath, INDEX_FILE) then
