@@ -221,6 +221,17 @@ elseif action == "make" then
 		end
 	end
 
+	print("* Converting posts")
+
+	-- Handle posts
+	for file in lfs.dir(target .. POSTS_DIR) do
+		local filePath = target .. POSTS_DIR .. "/" .. file
+
+		if checkExtension(filePath, "md") or checkExtension(filePath, "markdown") then
+
+		end
+	end
+
 	print("Done")
 
 end
