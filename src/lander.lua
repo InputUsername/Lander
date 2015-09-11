@@ -46,6 +46,7 @@ local function validatePost(postInfo)
 end
 
 local function linkTitle(title)
+	title = string.lower(title)
 	title = string.gsub(title, "%s", "-")
 	title = string.gsub(title, "[^%w%-_]", "")
 
@@ -62,7 +63,7 @@ local INDEX_FILE = "_pages/index.html"
 local INDEX_DEFAULT_CONTENT = [[<!DOCTYPE html>
 <html>
 <head>
-	<title><% echo( config.site.name ) %></title>
+	<title><% echo( config.siteName ) %></title>
 </head>
 <body>
 	<h1>Hello world!</h1>
@@ -84,9 +85,7 @@ local POST_DEFAULT_CONTENT = [[<!DOCTYPE html>
 
 local CONFIG_FILE = "_config.lua"
 local CONFIG_DEFAULT_CONTENT = [[config = {
-	site = {
-		name = "A website",
-	},
+	siteName = "A website",
 	pagesAsDirectories = false,
 }]]
 
@@ -179,7 +178,7 @@ elseif action == "make" then
 	print("* Converting posts")
 
 	-- Handle posts
-	local postFileContent = readFile(target .. "")
+	local postFileContent = readFile(target .. POST_FILE)
 
 	local posts = {}
 
@@ -262,6 +261,7 @@ elseif action == "make" then
 							end
 						end,
 						["config"] = config,
+						["post"] = postInfo,
 					}
 
 					local codeFunc, err = loadstring(code)
@@ -286,12 +286,20 @@ elseif action == "make" then
 					return output
 				end)
 
-				local outputPath = target .. OUTPUT_DIR .. postInfo["linkTitle"] .. ".html"
+				local outputPath = target .. OUTPUT_DIR .. "/" .. postInfo["linkTitle"] .. ".html"
 
 				writeFile(outputPath, postFileContent)
+
+				print(" * " .. filePath .. " -> " .. outputPath)
 			end
 		end
 	end
+
+	table.sort(posts, function(a, b)
+		if a["timestamp"] and b["timestamp"] then
+			return a["timestamp"] >= b["timestamp"]
+		end
+	end)
 
 	print("* Converting pages")
 
@@ -313,10 +321,13 @@ elseif action == "make" then
 
 			local fileContent = readFile(filePath)
 
+			--TODO: template code conversion as a function
 			fileContent = string.gsub(fileContent, "%<%%(.-)%%%>", function(code)
 				local output = ""
 
 				local env = {
+					--TODO: fix this thing
+					["ipairs"] = ipairs,
 					["echo"] = function(...)
 						local out = table.concat({...}, "\n")
 						if type(out) == "string" then
@@ -330,6 +341,7 @@ elseif action == "make" then
 						end
 					end,
 					["config"] = config,
+					["posts"] = posts,
 				}
 
 				local codeFunc, err = loadstring(code)
