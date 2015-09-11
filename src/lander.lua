@@ -41,6 +41,17 @@ local function writeFile(path, text)
 	return true
 end
 
+local function validatePost(postInfo)
+	return postInfo["title"] and postInfo["timestamp"] and postInfo["author"]
+end
+
+local function linkTitle(title)
+	title = string.gsub(title, "%s", "-")
+	title = string.gsub(title, "[^%w%-_]", "")
+
+	return title
+end
+
 ---- Constants ----
 local POSTS_DIR = "_posts"
 local PAGES_DIR = "_pages"
@@ -72,7 +83,7 @@ local POST_DEFAULT_CONTENT = [[<!DOCTYPE html>
 </html>]]
 
 local CONFIG_FILE = "_config.lua"
-local CONFIG_DEFAULT_CONTENT = [[return {
+local CONFIG_DEFAULT_CONTENT = [[config = {
 	site = {
 		name = "A website",
 	},
@@ -136,17 +147,22 @@ elseif action == "make" then
 	-- Load configuration file
 	local result, configFunc = pcall(loadfile, target .. CONFIG_FILE)
 
-	if not result then
+	if not result or not configFunc then
 		print("Error: cannot open the site config file (" .. target .. CONFIG_FILE .. ")")
 		os.exit(1)
 	end
 
-	local result, config = pcall(configFunc)
+	local configEnv = {}
+	setfenv(configFunc, configEnv)
 
-	if not result or not config then
+	local result = pcall(configFunc)
+
+	if not result or not configEnv["config"] then
 		print("Error: something went wrong while loading the site config file")
 		os.exit(1)
 	end
+
+	local config = configEnv["config"]
 
 	print("* Loaded site config")
 
@@ -159,6 +175,123 @@ elseif action == "make" then
 	end
 
 	print("* Loaded Markdown renderer")
+
+	print("* Converting posts")
+
+	-- Handle posts
+	local postFileContent = readFile(target .. "")
+
+	local posts = {}
+
+	for file in lfs.dir(target .. POSTS_DIR) do
+		local filePath = target .. POSTS_DIR .. "/" .. file
+
+		if checkExtension(filePath, "md") or checkExtension(filePath, "markdown") then
+			local fileContent = readFile(filePath)
+
+			local postInfo = {}
+
+			fileContent = string.gsub(fileContent, "%<%%(.-)%%%>", function(code)
+				local output = ""
+
+				local env = {
+					["echo"] = function(...)
+						local out = table.concat({...}, "\n")
+						if type(out) == "string" then
+							output = output .. out
+						end
+					end,
+					["include"] = function(file)
+						local content = readFile(target .. INCLUDES_DIR .. "/" .. file)
+						if content then
+							output = output .. content
+						end
+					end,
+					["config"] = config,
+				}
+
+				local codeFunc, err = loadstring(code)
+				if not codeFunc then
+					print("Error: something went wrong while loading template code")
+					print(err)
+					env.echo(err .. "\n")
+				else
+					setfenv(codeFunc, env)
+					local result, err = pcall(codeFunc)
+					if not result then
+						print("Error: something went wrong while running template code")
+						print(err)
+						env.echo(err .. "\n")
+					end
+
+					if env["post"] then
+						postInfo = env["post"]
+					end
+				end
+
+				return output
+			end)
+
+			if validatePost(postInfo) then
+				if not postInfo["dateFormat"] then
+					postInfo["dateFormat"] = "%d %b, %Y"
+				end
+				postInfo["date"] = os.date(postInfo["dateFormat"], postInfo["timestamp"])
+
+				postInfo["linkTitle"] = linkTitle(postInfo["title"])
+
+				fileContent = markdown(fileContent)
+				postInfo["content"] = fileContent
+
+				table.insert(posts, postInfo)
+
+				postFileContent = string.gsub(postFileContent, "%<%%(.-)%%%>", function(code)
+					local output = ""
+
+					local env = {
+						["echo"] = function(...)
+							local out = table.concat({...}, "\n")
+							if type(out) == "string" then
+								output = output .. out
+							end
+						end,
+						["include"] = function(file)
+							local content = readFile(target .. INCLUDES_DIR .. "/" .. file)
+							if content then
+								output = output .. content
+							end
+						end,
+						["config"] = config,
+					}
+
+					local codeFunc, err = loadstring(code)
+					if not codeFunc then
+						print("Error: something went wrong while loading template code")
+						print(err)
+						env.echo(err .. "\n")
+					else
+						setfenv(codeFunc, env)
+						local result, err = pcall(codeFunc)
+						if not result then
+							print("Error: something went wrong while running template code")
+							print(err)
+							env.echo(err .. "\n")
+						end
+
+						if env["post"] then
+							postInfo = env["post"]
+						end
+					end
+
+					return output
+				end)
+
+				local outputPath = target .. OUTPUT_DIR .. postInfo["linkTitle"] .. ".html"
+
+				writeFile(outputPath, postFileContent)
+			end
+		end
+	end
 
 	print("* Converting pages")
 
@@ -221,17 +354,8 @@ elseif action == "make" then
 		end
 	end
 
-	print("* Converting posts")
-
-	-- Handle posts
-	for file in lfs.dir(target .. POSTS_DIR) do
-		local filePath = target .. POSTS_DIR .. "/" .. file
-
-		if checkExtension(filePath, "md") or checkExtension(filePath, "markdown") then
-
-		end
-	end
-
 	print("Done")
 
+else
+	print("Unknown action '" .. action .. "'")
 end
