@@ -264,6 +264,8 @@ elseif action == "make" then
 						["post"] = postInfo,
 					}
 
+					setmetatable(env, {__index = _G})
+
 					local codeFunc, err = loadstring(code)
 					if not codeFunc then
 						print("Error: something went wrong while loading template code")
@@ -343,6 +345,7 @@ elseif action == "make" then
 					["config"] = config,
 					["posts"] = posts,
 				}
+				setmetatable(env, {__index = _G})
 
 				local codeFunc, err = loadstring(code)
 				if not codeFunc then
