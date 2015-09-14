@@ -208,6 +208,7 @@ elseif action == "make" then
 					end,
 					["config"] = config,
 				}
+				setmetatable(env, {__index = _G})
 
 				local codeFunc, err = loadstring(code)
 				if not codeFunc then
@@ -263,7 +264,6 @@ elseif action == "make" then
 						["config"] = config,
 						["post"] = postInfo,
 					}
-
 					setmetatable(env, {__index = _G})
 
 					local codeFunc, err = loadstring(code)
@@ -323,13 +323,10 @@ elseif action == "make" then
 
 			local fileContent = readFile(filePath)
 
-			--TODO: template code conversion as a function
 			fileContent = string.gsub(fileContent, "%<%%(.-)%%%>", function(code)
 				local output = ""
 
 				local env = {
-					--TODO: fix this thing
-					["ipairs"] = ipairs,
 					["echo"] = function(...)
 						local out = table.concat({...}, "\n")
 						if type(out) == "string" then
