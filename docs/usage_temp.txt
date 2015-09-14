@@ -1,15 +1,104 @@
+Command usage
+---
+
 Setting up a site:
    lua lander.lua setup [directory]
-   
+
    This will create all necessary subdirectories and files
    for a new Lander site in [directory]. If no directory is
    given, the working directory will be used.
 
 Generating a site:
    lua lander.lua make [directory]
-   
+
    This will use the subdirectories and files in [directory]
    to generate a static site under [directory]/_output. If
    no directory is given, the working directory will be used.
-   
+
    Assumes every necessary file/directory is present.
+
+Files and directories
+---
+When you set up a site, the following directory structure is created in the
+target directory:
+
+/
+|- _includes/
+|- _output/
+|- _pages/
+|  |- index.html
+|  |- post.html
+|- _posts/
+|- _config.lua
+
+The _includes directory contains HTML files that can be included in your main pages.
+This is useful for recurring items like a menu or a footer.
+
+The _output directory is where the site will be placed when it is built.
+The contents are ready to be copied to your web server.
+
+The _pages directory contains all pages of your website. These pages can contain
+HTML code and Lua templates, which will be covered later. These pages will be copied
+to the output directory after processing.
+
+The _posts directory should be filled with all your blog posts. They are written
+in Markdown and should contain a piece of template code that describes the post.
+How this works exactly will be covered later.
+
+The configuration file, _config.lua, contains a Lua table in which the site configuration
+variables are stored.
+
+The site configuration
+---
+The site configuration can be changed by editing _config.lua. By default,
+it contains the following settings:
+{
+    siteName = "A website",
+    pagesAsDirectories = false,
+}
+
+siteName is rather obvious; it's the name of the site.
+pagesAsDirectories causes pages to be converted to a directory, for example:
+somepage.html will be copied to the output directory as /somepage/index.html
+That way, you can navigate to your page by visiting /somepage/ instead of /somepage.html.
+
+Note that most settings don't have any impact on the creation of your site. They
+can be placed here and then simply referred to later, in template code.
+
+Lua templates
+---
+Pages and blog posts can contain Lua templates, which are snippets of Lua code
+that are embedded in the content and executed before the content is written to
+the output directory. The output of these snippets is substituted in their place.
+If you're familiar with PHP, this works more or less the same way.
+
+Lua templates are surrounded by <% and %>, that is, blocks denoted by <% and %>
+can contain Lua code. When the code is run, output is collected and after the snippet
+has finished executing, it will be replaced by the output.
+
+Example: <% echo("Hello world!") %>
+This will replace, in the contents of the file where it resides, everything between
+the <% and %> with "Hello world!" (without the quotes).
+
+These templates can use all built-in Lua functions. In addition to that, there are some
+useful functions and variables that Lander provides:
+
+echo(...)
+Takes a variable number of arguments. Writes every argument to the output of the snippet.
+Note that functions like print() will write output to STDIN; this means that print()
+and friends won't output anything in your page! Use echo() for that.
+
+include(file)
+Includes <file> from the _includes directory. This basically writes it to the snippet's
+output. The include file is directly included, so includes cannot contain template code.
+
+config
+The config variable that is set in _config.lua is available in every piece of template code.
+An example use of this is showing the site name in the <title> tags of a page.
+
+posts
+In pages, that is, HTML files placed in the _pages directory, the special variable
+posts is available. This is a Lua array (table) containing the site's posts, parsed
+from the files in the _posts directory. The posts are ordered by their timestamp,
+in descending order (newest post first). Every element of the posts is a table
+describing the post. More info on the format of these tables later.
