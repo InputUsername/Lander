@@ -264,8 +264,6 @@ elseif action == "make" then
 				fileContent = markdown(fileContent)
 				postInfo["content"] = fileContent
 
-				table.insert(posts, postInfo)
-
 				postFileContent = string.gsub(postFileContent, "%<%%(.-)%%%>", function(code)
 					local output = ""
 
@@ -309,9 +307,13 @@ elseif action == "make" then
 					return output
 				end)
 
-				local outputPath = target .. OUTPUT_DIR .. "/" .. postInfo["linkTitle"] .. ".html"
+				--TODO: output post
 
-				writeFile(outputPath, postFileContent)
+				postInfo["link"] = postInfo["linkTitle"] .. ".html"
+
+				local outputPath = target .. OUTPUT_DIR .. "/" .. postInfo["linkTitle"]
+
+				table.insert(posts, postInfo)
 
 				print(" * " .. filePath .. " -> " .. outputPath)
 			end
