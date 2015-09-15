@@ -53,6 +53,20 @@ local function linkTitle(title)
 	return title
 end
 
+local function recursiveDelete(path)
+	if string.sub(string.match(path, "([^/]+/?)$"), 1, 1) == "." then return end
+
+	if lfs.attributes(path, "mode") == "directory" then
+		for file in lfs.dir(path) do
+			recursiveDelete(path .. "/" .. file)
+		end
+
+		lfs.rmdir(path)
+	end
+
+	os.remove(path)
+end
+
 ---- Constants ----
 local POSTS_DIR = "_posts"
 local PAGES_DIR = "_pages"
@@ -142,6 +156,13 @@ elseif action == "make" then
 	end
 
 	print("Generating site")
+
+	-- Remove previous output
+	for file in lfs.dir(target .. OUTPUT_DIR) do
+		recursiveDelete(target .. OUTPUT_DIR .. "/" .. file)
+	end
+
+	print("* Removed previous output")
 
 	-- Load configuration file
 	local result, configFunc = pcall(loadfile, target .. CONFIG_FILE)
