@@ -102,3 +102,9 @@ posts is available. This is a Lua array (table) containing the site's posts, par
 from the files in the _posts directory. The posts are ordered by their timestamp,
 in descending order (newest post first). Every element of the posts is a table
 describing the post. More info on the format of these tables later.
+
+Writing posts
+---
+Posts are written in Markdown format, which is a simple file format that supports
+multiple kinds of markup. This way you can easily add styling like emphasised or
+strong text and block quotes. More on Markdown at http://daringfireball.net/projects/markdown.
