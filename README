@@ -1,4 +1,6 @@
 Lander is (going to be) a really simple static site generator. It's written in Lua.
 It will use only Lua (and Markdown to write blog posts). Heavily inspired by Jekyll.
 
-Unfortunately requires Lua 5.1 due to a library that doesn't work on 5.3.
+Uses http://www.frykholm.se/files/markdown.lua to render Markdown files.
+
+Learn more about Lander in the wiki: https://github.com/InputUsername/Lander/wiki
