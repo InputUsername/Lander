@@ -157,12 +157,21 @@ elseif action == "make" then
 
 	print("Generating site")
 
+	--[[
 	-- Remove previous output
 	for file in lfs.dir(target .. OUTPUT_DIR) do
 		recursiveDelete(target .. OUTPUT_DIR .. "/" .. file)
 	end
 
 	print("* Removed previous output")
+	]]
+
+	-- Show message if there's previous output
+	for file in lfs.dir(target .. OUTPUT_DIR) do
+		print("There's previous output in " .. target .. OUTPUT_DIR .. "."
+			.. "It is recommended that you remove previous output before generating your site.")
+		break
+	end
 
 	-- Load configuration file
 	local result, configFunc = pcall(loadfile, target .. CONFIG_FILE)
@@ -254,17 +263,14 @@ elseif action == "make" then
 			end)
 
 			if validatePost(postInfo) then
-				if not postInfo["dateFormat"] then
-					postInfo["dateFormat"] = "%d %b, %Y"
-				end
-				postInfo["date"] = os.date(postInfo["dateFormat"], postInfo["timestamp"])
+				postInfo["date"] = os.date("%t", postInfo["timestamp"])
 
 				postInfo["linkTitle"] = linkTitle(postInfo["title"])
 
 				fileContent = markdown(fileContent)
 				postInfo["content"] = fileContent
 
-				postFileContent = string.gsub(postFileContent, "%<%%(.-)%%%>", function(code)
+				local postFileOutput = string.gsub(postFileContent, "%<%%(.-)%%%>", function(code)
 					local output = ""
 
 					local env = {
@@ -307,11 +313,34 @@ elseif action == "make" then
 					return output
 				end)
 
-				--TODO: output post
+				local outputPath = target .. OUTPUT_DIR .. "/"
 
-				postInfo["link"] = postInfo["linkTitle"] .. ".html"
+				local link = ""
 
-				local outputPath = target .. OUTPUT_DIR .. "/" .. postInfo["linkTitle"]
+				local create = {
+					postInfo["date"]["year"],
+					postInfo["date"]["month"],
+					postInfo["date"]["day"]
+				}
+
+				for _, dir in ipairs(create) do
+					link = link .. dir .. "/"
+					lfs.mkdir(outputPath .. link)
+				end
+
+				if config.pagesAsDirectories then
+					link = link .. postInfo["linkTitle"] .. "/"
+					lfs.mkdir(outputPath .. link)
+					link = link .. "index.html"
+				else
+					link = link .. postInfo["linkTitle"] .. ".html"
+				end
+
+				postInfo["link"] = link
+
+				outputPath = outputPath .. link
+
+				writeFile(outputPath, postFileOutput)
 
 				table.insert(posts, postInfo)
 
